@@ -4,13 +4,13 @@ import java.util.Map;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.cevaris.awslambda.models.ApiHttpException;
 import com.cevaris.awslambda.models.ApiHttpRequest;
 import com.cevaris.awslambda.models.ApiHttpResponse;
 import com.cevaris.awslambda.utils.AwsHandler;
 import com.google.common.base.Preconditions;
 
-import org.apache.http.HttpStatus;
-
+import org.apache.commons.httpclient.HttpStatus;
 
 public class ToUpperHandler extends AwsHandler {
 
@@ -24,21 +24,20 @@ public class ToUpperHandler extends AwsHandler {
 
     Map<String, String> params = request.getQueryStringParameters();
 
-    ApiHttpResponse response = ApiHttpResponse.builder()
-        .statusCode(HttpStatus.SC_OK)
-        .build();
-
-    ToUpperHandlerResponse body = new ToUpperHandlerResponse();
+    ApiHttpResponse response = new ApiHttpResponse();
 
     if (params != null && params.containsKey("value")) {
       String value = params.get("value").toUpperCase();
-      body.setValue(value);
+      ToUpperHandlerResponse body = new ToUpperHandlerResponse(value);
       response.setBody(body.toJson());
+      response.setStatusCode(HttpStatus.SC_OK);
     } else {
-      response.setException(new RuntimeException("missing value parameter"));
+      ApiHttpException exception = new ApiHttpException();
+      exception.setMessage("missing value query parameter");
+      exception.setRequestId(context.getAwsRequestId());
+      response.setBody(exception.toJson());
       response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
     }
-
     return response;
   }
 

@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import com.cevaris.awslambda.models.ApiHttpResponse;
+import com.cevaris.awslambda.models.ApiHttpException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.apache.http.HttpStatus;
 
 public class JsonUtils {
 
@@ -18,11 +16,9 @@ public class JsonUtils {
     try {
       return mapper.writeValueAsString(obj);
     } catch (JsonProcessingException e) {
-      ApiHttpResponse response = ApiHttpResponse.builder()
-          .exception(e)
-          .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-          .build();
-      return toJson(response);
+      ApiHttpException exception = new ApiHttpException();
+      exception.setMessage(e.getMessage());
+      throw new RuntimeException(exception.toJson());
     }
   }
 

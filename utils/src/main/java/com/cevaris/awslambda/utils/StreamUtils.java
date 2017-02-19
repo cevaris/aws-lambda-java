@@ -17,7 +17,7 @@ public class StreamUtils {
     return CharStreams.toString(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
   }
 
-  public static String fromOuputStream(OutputStream outputStream) {
+  public static String fromOutputStream(OutputStream outputStream) {
     ByteArrayOutputStream b = (ByteArrayOutputStream) outputStream;
     return new String(b.toByteArray(), StandardCharsets.UTF_8);
   }

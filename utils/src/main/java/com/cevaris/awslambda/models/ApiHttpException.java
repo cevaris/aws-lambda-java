@@ -1,10 +1,7 @@
 package com.cevaris.awslambda.models;
 
-import java.util.Map;
-
 import com.cevaris.awslambda.utils.JsonSerializable;
 import com.cevaris.awslambda.utils.JsonUtils;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,9 +12,10 @@ import lombok.Setter;
 
 /**
  * {
- * "body": "A JSON string of the request payload."
- * "headers": {Incoming request headers}
- * "statusCode": "HTTP status code"
+ * "errorType": "BadRequest",
+ * "httpStatus": 400,
+ * "requestId": "aws-request-id-2342342-2342-34234",
+ * "message": "That, was a terrible request"
  * }
  */
 @Builder
@@ -26,15 +24,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class ApiHttpResponse implements JsonSerializable {
+public class ApiHttpException implements JsonSerializable {
 
-  private Integer statusCode;
-
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private Map<String, String> headers;
-
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private String body;
+  private String requestId = "unknown";
+  private String message;
 
   @Override
   public String toString() {
@@ -45,6 +38,5 @@ public class ApiHttpResponse implements JsonSerializable {
   public String toJson() {
     return JsonUtils.toJson(this);
   }
-
 
 }

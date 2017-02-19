@@ -6,13 +6,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.cevaris.awslambda.models.ApiHttpException;
 import com.cevaris.awslambda.models.ApiHttpRequest;
 import com.cevaris.awslambda.models.ApiHttpResponse;
 import com.cevaris.awslambda.utils.AwsHandler;
 import com.cevaris.awslambda.utils.JsonUtils;
 import com.cevaris.awslambda.utils.StreamUtils;
 
-import org.apache.http.HttpStatus;
+import org.apache.commons.httpclient.HttpStatus;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,17 +28,17 @@ public class ToUpperHandlerIntegrationTest {
     ApiHttpRequest request = new ApiHttpRequest();
     request.addQueryParameters("value", "test");
 
-    String requestString = JsonUtils.toJson(request);
+    String requestString = request.toJson();
     InputStream input = StreamUtils.toInputStream(requestString);
     OutputStream output = new ByteArrayOutputStream();
     handler.handleRequest(input, output, context);
 
-    String responseString = StreamUtils.fromOuputStream(output);
+    String responseString = StreamUtils.fromOutputStream(output);
     ApiHttpResponse actualJson = JsonUtils.fromJson(responseString, ApiHttpResponse.class);
 
     ApiHttpResponse expectedJson = ApiHttpResponse.builder()
         .body("{\"value\":\"TEST\"}")
-        .statusCode(200)
+        .statusCode(HttpStatus.SC_OK)
         .build();
 
     Assert.assertEquals(expectedJson, actualJson);
@@ -55,17 +56,20 @@ public class ToUpperHandlerIntegrationTest {
 
     handler.handleRequest(input, output, context);
 
-    String responseString = StreamUtils.fromOuputStream(output);
+    String responseString = StreamUtils.fromOutputStream(output);
     ApiHttpResponse actualJson = JsonUtils.fromJson(responseString, ApiHttpResponse.class);
 
+    ApiHttpException exception = new ApiHttpException();
+    exception.setMessage("missing value query parameter");
+    exception.setRequestId(context.getAwsRequestId());
+
     ApiHttpResponse expectedJson = ApiHttpResponse.builder()
+        .body(exception.toJson())
         .statusCode(HttpStatus.SC_BAD_REQUEST)
-        .exception(new RuntimeException("missing value parameter"))
         .build();
 
-    Assert.assertEquals(expectedJson.getStatusCode(), actualJson.getStatusCode());
-    Assert.assertNotNull(actualJson.getStatusCode());
-    Assert.assertNull(actualJson.getBody());
+    Assert.assertEquals(expectedJson, actualJson);
+
   }
 
 }
