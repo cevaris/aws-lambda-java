@@ -1,4 +1,4 @@
-package com.cevaris.awslambda.stringapi.utils;
+package com.cevaris.awslambda.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +26,11 @@ public class JsonUtils {
   }
 
   public static Map fromJson(InputStream input) throws IOException {
-    return mapper.readValue(input, Map.class);
+    return fromJson(input, Map.class);
+  }
+
+  public static <T> T fromJson(InputStream input, Class<T> clazz) throws IOException {
+    return mapper.readValue(input, clazz);
   }
 
   public static Map fromJson(String str) throws IOException {

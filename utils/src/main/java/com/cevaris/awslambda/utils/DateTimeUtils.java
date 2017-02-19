@@ -1,4 +1,4 @@
-package com.cevaris.awslambda.stringapi.utils;
+package com.cevaris.awslambda.utils;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;

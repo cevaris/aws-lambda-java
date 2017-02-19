@@ -1,4 +1,4 @@
-package com.cevaris.awslambda.stringapi.utils;
+package com.cevaris.awslambda.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +10,7 @@ import java.util.Map;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.cevaris.awslambda.models.ApiHttpRequest;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
@@ -27,17 +28,17 @@ public abstract class AwsHandler implements RequestStreamHandler {
     logger.log(String.format("Context.getFunctionName: %s\n", context.getFunctionName()));
     logger.log(String.format("Context.getAwsRequestId: %s\n", context.getAwsRequestId()));
 
-    Map json = JsonUtils.fromJson(input);
-    logger.log(String.format("Request: %s\n", json));
+    ApiHttpRequest request = JsonUtils.fromJson(input, ApiHttpRequest.class);
+    logger.log(String.format("Request: %s\n", request));
 
-    String responseStr = handleEvent(json, context);
+    String responseStr = handleEvent(request, context);
     output.write(responseStr.getBytes(StandardCharsets.UTF_8));
   }
 
   /**
    * Entry point into aws lambda handler
    */
-  protected abstract String handleEvent(Map request, Context context);
+  protected abstract String handleEvent(ApiHttpRequest request, Context context);
 
   /**
    * Load up any modules at runtime

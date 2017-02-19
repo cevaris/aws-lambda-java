@@ -7,9 +7,10 @@ import java.io.OutputStream;
 import java.util.Map;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.cevaris.awslambda.stringapi.utils.AwsHandler;
-import com.cevaris.awslambda.stringapi.utils.JsonUtils;
-import com.cevaris.awslambda.stringapi.utils.StreamUtils;
+import com.cevaris.awslambda.models.ApiHttpRequest;
+import com.cevaris.awslambda.utils.AwsHandler;
+import com.cevaris.awslambda.utils.JsonUtils;
+import com.cevaris.awslambda.utils.StreamUtils;
 import com.google.common.collect.Maps;
 
 import org.junit.Assert;
@@ -23,13 +24,10 @@ public class ToUpperHandlerIntegrationTest {
     AwsHandler handler = new ToUpperHandler();
     Context context = new TestContext(funcName);
 
+    ApiHttpRequest request = new ApiHttpRequest();
+    request.addQueryParameters("value", "test");
 
-    Map body = Maps.newHashMap();
-    body.put("value", "test");
-
-    Map<String, Object> testData = Maps.newHashMap();
-    testData.put("queryStringParameters", body);
-    String requestString = JsonUtils.toJson(testData);
+    String requestString = JsonUtils.toJson(request);
 
     InputStream input = StreamUtils.toInputStream(requestString);
     OutputStream output = new ByteArrayOutputStream();

@@ -1,4 +1,4 @@
-package com.cevaris.awslambda.stringapi.utils;
+package com.cevaris.awslambda.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
