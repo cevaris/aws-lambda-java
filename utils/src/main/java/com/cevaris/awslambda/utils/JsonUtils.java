@@ -4,25 +4,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import com.cevaris.awslambda.models.ApiHttpResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
+
+import org.apache.http.HttpStatus;
 
 public class JsonUtils {
 
   private static ObjectMapper mapper = new ObjectMapper();
 
   public static String toJson(Object obj) {
-    String json;
     try {
-      json = mapper.writeValueAsString(obj);
+      return mapper.writeValueAsString(obj);
     } catch (JsonProcessingException e) {
-      e.printStackTrace();
-      Map<String, Object> error = Maps.newHashMap();
-      error.put("message", e.getMessage());
-      json = JsonUtils.toJson(error);
+      ApiHttpResponse response = ApiHttpResponse.builder()
+          .exception(e)
+          .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+          .build();
+      return toJson(response);
     }
-    return json;
   }
 
   public static Map fromJson(InputStream input) throws IOException {

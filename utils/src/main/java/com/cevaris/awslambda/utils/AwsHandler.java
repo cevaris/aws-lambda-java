@@ -5,12 +5,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.cevaris.awslambda.models.ApiHttpRequest;
+import com.cevaris.awslambda.models.ApiHttpResponse;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
@@ -28,17 +28,23 @@ public abstract class AwsHandler implements RequestStreamHandler {
     logger.log(String.format("Context.getFunctionName: %s\n", context.getFunctionName()));
     logger.log(String.format("Context.getAwsRequestId: %s\n", context.getAwsRequestId()));
 
-    ApiHttpRequest request = JsonUtils.fromJson(input, ApiHttpRequest.class);
-    logger.log(String.format("Request: %s\n", request));
+    String requestRawJson = StreamUtils.fromInputStream(input);
+    logger.log(String.format("Request raw json: %s\n", requestRawJson));
 
-    String responseStr = handleEvent(request, context);
+    ApiHttpRequest request = JsonUtils.fromJson(requestRawJson, ApiHttpRequest.class);
+    logger.log(String.format("Request parsed instance: %s\n", request));
+
+    ApiHttpResponse response = handleEvent(request, context);
+    String responseStr = JsonUtils.toJson(response);
+
+    logger.log(String.format("Response: %s\n", responseStr));
     output.write(responseStr.getBytes(StandardCharsets.UTF_8));
   }
 
   /**
    * Entry point into aws lambda handler
    */
-  protected abstract String handleEvent(ApiHttpRequest request, Context context);
+  protected abstract ApiHttpResponse handleEvent(ApiHttpRequest request, Context context);
 
   /**
    * Load up any modules at runtime

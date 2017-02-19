@@ -5,10 +5,9 @@ import java.util.Map;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.cevaris.awslambda.models.ApiHttpRequest;
+import com.cevaris.awslambda.models.ApiHttpResponse;
 import com.cevaris.awslambda.utils.AwsHandler;
-import com.cevaris.awslambda.utils.JsonUtils;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 import org.apache.http.HttpStatus;
 
@@ -16,7 +15,7 @@ import org.apache.http.HttpStatus;
 public class ToUpperHandler extends AwsHandler {
 
   @Override
-  protected String handleEvent(ApiHttpRequest request, Context context) {
+  protected ApiHttpResponse handleEvent(ApiHttpRequest request, Context context) {
     Preconditions.checkNotNull(request);
 
     LambdaLogger logger = context.getLogger();
@@ -25,22 +24,18 @@ public class ToUpperHandler extends AwsHandler {
 
     Map<String, String> params = request.getQueryStringParameters();
 
-    String value = "empty";
+    ToUpperHandlerResponse toUpperResponse = new ToUpperHandlerResponse();
     if (params.containsKey("value")) {
-      value = (String) params.get("value");
-      value = value.toUpperCase();
+      String value = params.get("value").toUpperCase();
+      toUpperResponse.setValue(value);
     }
 
-    Map<String, Object> resposneBody = Maps.newHashMap();
-    resposneBody.put("value", value);
+    ApiHttpResponse response = ApiHttpResponse.builder()
+        .body(toUpperResponse.toJson())
+        .statusCode(HttpStatus.SC_OK)
+        .build();
 
-    Map<String, Object> resposne = Maps.newHashMap();
-    resposne.put("statusCode", HttpStatus.SC_OK);
-    resposne.put("body", JsonUtils.toJson(resposneBody));
-    resposne.put("headers", Maps.newHashMap());
-    String json = JsonUtils.toJson(resposne);
-    logger.log(String.format("response $%s\n", json));
-    return json;
+    return response;
   }
 
 }
