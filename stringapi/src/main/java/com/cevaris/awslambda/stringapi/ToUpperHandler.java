@@ -24,16 +24,20 @@ public class ToUpperHandler extends AwsHandler {
 
     Map<String, String> params = request.getQueryStringParameters();
 
-    ToUpperHandlerResponse toUpperResponse = new ToUpperHandlerResponse();
-    if (params.containsKey("value")) {
-      String value = params.get("value").toUpperCase();
-      toUpperResponse.setValue(value);
-    }
-
     ApiHttpResponse response = ApiHttpResponse.builder()
-        .body(toUpperResponse.toJson())
         .statusCode(HttpStatus.SC_OK)
         .build();
+
+    ToUpperHandlerResponse body = new ToUpperHandlerResponse();
+
+    if (params != null && params.containsKey("value")) {
+      String value = params.get("value").toUpperCase();
+      body.setValue(value);
+      response.setBody(body.toJson());
+    } else {
+      response.setException(new RuntimeException("missing value parameter"));
+      response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+    }
 
     return response;
   }
